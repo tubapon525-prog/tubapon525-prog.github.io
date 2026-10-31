@@ -1,0 +1,48 @@
+name: アカウントとつなぐ（最初だけ）
+
+on:
+  workflow_dispatch:
+    inputs:
+      step:
+        description: "①○○_url でログイン用URLを出す → ②ログイン後のURLを貼って ○○_exchange"
+        type: choice
+        options: [youtube_url, youtube_exchange, tiktok_url, tiktok_exchange]
+      redirected_url:
+        description: "（exchange のときだけ）ログイン後のURLをまるごと貼る"
+        required: false
+        default: ""
+
+jobs:
+  url:
+    if: ${{ endsWith(inputs.step, '_url') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: ログイン用URLを作る
+        env:
+          STEP: ${{ inputs.step }}
+          YOUTUBE_CLIENT_ID: ${{ vars.YOUTUBE_CLIENT_ID }}
+          TIKTOK_CLIENT_KEY_PUBLIC: ${{ vars.TIKTOK_CLIENT_KEY }}
+        run: python scripts/connect.py
+
+  exchange:
+    if: ${{ endsWith(inputs.step, '_exchange') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: 更新用の鍵を作る
+        env:
+          STEP: ${{ inputs.step }}
+          REDIRECTED_URL: ${{ inputs.redirected_url }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
+          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+        run: python scripts/connect.py
