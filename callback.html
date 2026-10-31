@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ログイン完了 | sns-auto</title>
+<style>
+body{font-family:"Hiragino Sans","Noto Sans JP",sans-serif;max-width:680px;margin:0 auto;padding:40px 20px;line-height:1.8;color:#222;background:#fafaf7}
+h1{font-size:24px}
+textarea{width:100%;box-sizing:border-box;height:140px;font:14px/1.5 ui-monospace,Menlo,monospace;padding:10px;border:1px solid #ccc;border-radius:8px}
+button{margin-top:12px;font-size:16px;padding:10px 18px;border:0;border-radius:8px;background:#2f5d8a;color:#fff;cursor:pointer}
+.ok{color:#3f8a4f;font-weight:bold}
+.err{color:#b3261e;font-weight:bold}
+.en{color:#555}
+</style>
+</head>
+<body>
+<h1 id="title">ログインが終わりました</h1>
+<p id="msg">下のURLをコピーして、GitHubの「アカウントとつなぐ」の <b>redirected_url</b> に貼ってください。</p>
+<p class="en">Copy the URL below and paste it into the GitHub workflow.</p>
+<textarea id="url" readonly></textarea>
+<button id="copy" type="button">コピーする</button>
+<p id="done"></p>
+<script>
+(function(){
+  var box=document.getElementById('url');
+  box.value=location.href;
+  var p=new URLSearchParams(location.search);
+  if(p.get('error')){
+    document.getElementById('title').textContent='ログインが許可されませんでした';
+    document.getElementById('msg').innerHTML='<span class="err">'+(p.get('error_description')||p.get('error'))+'</span><br>もう一度、最初からやり直してください。';
+  }
+  document.getElementById('copy').addEventListener('click',function(){
+    box.select();
+    var done=document.getElementById('done');
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(box.value).then(function(){done.innerHTML='<span class="ok">コピーしました ✅</span>';},function(){document.execCommand('copy');done.innerHTML='<span class="ok">コピーしました ✅</span>';});
+    }else{document.execCommand('copy');done.innerHTML='<span class="ok">コピーしました ✅</span>';}
+  });
+})();
+</script>
+</body>
+</html>
